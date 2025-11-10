@@ -57,7 +57,7 @@ CHECK_INTERVAL = 3600  # Segundos (3600 = 1 hora)
 ### 4️⃣ Permisos para Grupos
 
 Si vas a usar el bot en un grupo:
-1. Añade el bot como administrador del grupo
+1. Añade el bot como administrador del grupo, O
 2. Asegúrate de que el bot tenga permiso para enviar mensajes
 3. Usa el **Chat ID negativo** del grupo en la configuración
 
@@ -222,6 +222,16 @@ networks:
     driver: bridge
 ```
 
+### Preparar el entorno
+
+```bash
+# Crear carpeta para datos persistentes
+mkdir data
+
+# Asegurarse de que tenga permisos
+chmod 777 data
+```
+
 ### Construir y ejecutar
 
 ```bash
@@ -332,6 +342,26 @@ free-games-bot/
 └── README.md               # Este archivo
 ```
 
+### Formato de notified_games.json
+
+El bot guarda los juegos notificados con su timestamp:
+
+```json
+{
+  "steam": {
+    "862740": 1699545600.0,
+    "123456": 1699632000.0
+  },
+  "epic": {
+    "abc123def": 1699718400.0
+  }
+}
+```
+
+- **Clave**: ID del juego
+- **Valor**: Timestamp Unix de cuando se notificó
+- **Limpieza**: Los juegos se eliminan automáticamente después de 7 días
+
 ---
 
 ## 🔧 Solución de Problemas
@@ -362,6 +392,21 @@ pip install python-telegram-bot requests
 - Algunas promociones regionales no aparecen en las APIs públicas
 - El bot verifica cada hora (configurable)
 
+### Quiero resetear los juegos notificados
+
+**Opción 1 - Borrar todo:**
+```bash
+# Eliminar el archivo para empezar de cero
+rm notified_games.json  # Linux/Mac
+del notified_games.json  # Windows
+```
+
+**Opción 2 - Editar manualmente:**
+Abre `notified_games.json` y elimina los IDs que quieras volver a recibir.
+
+**Opción 3 - Cambiar el período de limpieza:**
+Reduce el valor de `days` temporalmente a 1 día para limpiar más rápido.
+
 ### Consumo de recursos
 
 - **RAM:** ~50-100 MB
@@ -377,6 +422,32 @@ pip install python-telegram-bot requests
 ```python
 CHECK_INTERVAL = 1800  # 30 minutos
 CHECK_INTERVAL = 7200  # 2 horas
+```
+
+### Cambiar período de limpieza automática
+
+Por defecto, el bot elimina juegos notificados después de **7 días**. Esto permite que si un juego vuelve a estar gratis en el futuro, te notifique de nuevo.
+
+Para cambiar este período, modifica la función `clean_old_games()` en las dos líneas donde aparece:
+
+```python
+# Al inicio del bot (línea ~390)
+notified_games = clean_old_games(notified_games, days=14)  # 14 días
+
+# Después de cada verificación (línea ~425)
+notified_games = clean_old_games(notified_games, days=14)  # 14 días
+```
+
+**Valores recomendados:**
+- `days=7` - Una semana (por defecto, duración típica de promociones)
+- `days=30` - Un mes
+- `days=90` - Tres meses
+- `days=365` - Un año
+
+**Para deshabilitar la limpieza automática** (no recomendado):
+```python
+# Comenta o elimina las líneas que llaman a clean_old_games()
+# notified_games = clean_old_games(notified_games, days=7)
 ```
 
 ### Modificar mensaje de notificación
@@ -409,9 +480,18 @@ Si solo quieres notificaciones de Epic Games, comenta las líneas de Steam:
 
 - ⚠️ **Rate Limits:** Steam limita peticiones. El bot hace pausas automáticas
 - 🔄 **Actualizaciones:** La API de Steam puede tener delays de hasta 24h
-- 💾 **Persistencia:** `notified_games.json` guarda los juegos ya notificados. Puedes borrarlo para reiniciar
+- 💾 **Persistencia:** `notified_games.json` guarda los juegos ya notificados con timestamps
+- 🧹 **Limpieza automática:** Los juegos se eliminan después de 7 días, permitiendo re-notificaciones futuras
+- 🔁 **Re-notificaciones:** Si un juego vuelve a estar gratis después de 7 días, recibirás una nueva notificación
 - 🐳 **Docker:** Recomendado para facilitar migraciones entre dispositivos
 - 📊 **Logs:** El bot muestra información detallada en consola
+
+### ¿Por qué 7 días de limpieza?
+
+Las promociones temporales de juegos gratis suelen durar **entre 3-7 días**. Con este período:
+- ✅ No recibes notificaciones duplicadas durante la misma promoción
+- ✅ Si el juego vuelve a estar gratis en el futuro (meses después), te avisará de nuevo
+- ✅ Mantiene el archivo `notified_games.json` limpio y eficiente
 
 ---
 
