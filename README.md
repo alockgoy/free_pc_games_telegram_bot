@@ -57,7 +57,7 @@ CHECK_INTERVAL = 3600  # Segundos (3600 = 1 hora)
 ### 4️⃣ Permisos para Grupos
 
 Si vas a usar el bot en un grupo:
-1. Añade el bot como administrador del grupo, O
+1. Añade el bot como administrador del grupo
 2. Asegúrate de que el bot tenga permiso para enviar mensajes
 3. Usa el **Chat ID negativo** del grupo en la configuración
 
