@@ -1,5 +1,3 @@
-# Ejecutar este comando previamente en el S.O: pip install python-telegram-bot --upgrade
-
 import os
 import time
 import requests
@@ -15,12 +13,16 @@ from telegram.error import TelegramError
 # =============================================================================
 # CONFIGURACIÓN
 # =============================================================================
-TELEGRAM_BOT_TOKEN = "Token"  # Obtener de @BotFather
-TELEGRAM_CHAT_ID = "ID"  # Tu ID de chat o ID del canal
+TELEGRAM_BOT_TOKEN = "TU_TOKEN_DE_BOT"  # Obtener de @BotFather
+TELEGRAM_CHAT_ID = "TU_CHAT_ID"  # Tu ID de chat o ID del canal
 
-# Archivo para guardar juegos ya notificados (en el directorio del script)
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-NOTIFIED_GAMES_FILE = os.path.join(SCRIPT_DIR, "notified_games.json")
+# Archivo para guardar juegos ya notificados
+# Si existe /app/data (Docker), usa esa carpeta, sino usa el directorio del script
+if os.path.exists('/app/data'):
+    NOTIFIED_GAMES_FILE = '/app/data/notified_games.json'
+else:
+    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+    NOTIFIED_GAMES_FILE = os.path.join(SCRIPT_DIR, "notified_games.json")
 
 # Intervalo de verificación (en segundos)
 CHECK_INTERVAL = 3600  # 1 hora
