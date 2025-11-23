@@ -517,3 +517,5 @@ Si tienes problemas:
 ---
 
 **¡Disfruta de tus juegos gratis!** 🎮🎉
+
+Este bot fue creado usando Claude AI sonnet 4.5
